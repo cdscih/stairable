@@ -1,63 +1,80 @@
+import { cpus } from 'node:os';
 import autocannon from 'autocannon';
 
 interface Options {
   url: string,
-  expectedAvgMsResponseTime: number,
-  expectedMaxStdDevMsResponseTime: number,
+  maxResTime: number,
+  minRPS: number
+  minConnections?: number,
   method?: autocannon.Request["method"],
   duration?: number,
   threads?: number,
+  verbose?: boolean,
   //   inputNumLimit: 10,
 }
 
-export async function isScalableEnough(opts: Options) {
+export async function isScalableEnough(opts: Options): Promise<any> {
+
   const {
     url,
     method,
-    expectedAvgMsResponseTime,
-    expectedMaxStdDevMsResponseTime,
+    maxResTime,
+    minRPS,
+    minConnections,
     duration,
-    threads
+    threads,
+    verbose
   } = opts
 
-  const output: Record<string, any> = { url }
-
-  const connectionsTests = [1, 10, 100, 1000, 10000]
+  const output: Record<string, any> = { url, tests: [], outcome: {} }
 
   let connections = 1
-  let level = 0
-  let outcome
-
+  let success = false
   do {
     const result = await autocannon({
       url,
       method: method ?? 'GET',
-      duration: duration ?? 5,
-      workers: threads ?? 1,
+      duration: duration ?? 10,
+      workers: threads ?? (cpus().length - 1),
       connections: connections
     })
 
-    outcome = (result.latency.average < expectedAvgMsResponseTime && result.latency.stddev < expectedMaxStdDevMsResponseTime) ? "success" : "failure"
+    success = (result.latency.average < maxResTime) ? true : false
 
-    output[level] = {
-      outcome,
-      expectedAvgMsResponseTime,
-      expectedMaxStdDevMsResponseTime,
+    const outcome = {
+      connections,
+      rps: result.requests.sent,
       avgMs: result.latency.average,
       stddev: result.latency.stddev,
       non2xx: result.non2xx,
-      rps: result.requests.sent
     }
-    connections *= 10
-    level++
-  } while (outcome == "success");
+
+    output.tests.push({
+      success,
+      ...outcome
+    })
+    if (success) {
+      output.outcome = {
+        targets: {
+          maxResTime,
+          minRPS,
+          minConnections,
+        },
+        ...outcome
+      }
+      connections *= 10
+    }
+  } while (success);
+
+  if (!verbose) delete output.tests
+
+  output.outcome["success"] = output.outcome.avgMs < maxResTime && output.outcome.rps > minRPS && output.outcome.connections <= (minConnections ?? output.outcome.connections)
 
   return output
 }
 
 isScalableEnough({
-  url: 'example.com',
-  method: "GET",
-  expectedAvgMsResponseTime: 1,
-  expectedMaxStdDevMsResponseTime: 1
-}).then((res) => console.log(res));
+  url: 'localhost:3000',
+  maxResTime: 100,
+  minRPS: 100000
+}).then(console.log);

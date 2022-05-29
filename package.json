@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest --silent",
     "start": "tsc && node dist/lib/index.js",
-    "lint": "eslint"
+    "lint": "eslint",
+    "launch-test-server":  "npx ts-node test/test.server.ts"
   },
   "repository": {
     "type": "git",

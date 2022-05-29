@@ -25,10 +25,11 @@ describe('Fire', () => {
   test('basic use', async () => {
     const res = await isScalableEnough({
       url: 'localhost:3000',
-      method: "GET",
-      expectedAvgMsResponseTime: 1,
-      expectedMaxStdDevMsResponseTime: 1
+      maxResTime: 1,
+      minRPS: 1,
+      threads: 1,
+      duration: 1
     })
-    expect(res[1]).toBeDefined();
+    expect(res.outcome.success).toBeFalsy();
   });
 });

@@ -4,7 +4,7 @@ import http from 'node:http';
 import { cpus } from 'node:os';
 import process from 'node:process';
 
-const numCPUs = cpus().length;
+const numCPUs = (cpus().length) * 2;
 
 if (cluster.isPrimary) {
   console.log(`Primary ${process.pid} is running`);

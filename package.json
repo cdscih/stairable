@@ -5,9 +5,9 @@
   "main": "lib/index.ts",
   "scripts": {
     "test": "jest --silent",
-    "start": "tsc && node dist/lib/index.js",
+    "start": "tsc && node dist/index.js",
     "lint": "eslint",
-    "launch-test-server":  "npx ts-node test/test.server.ts"
+    "launch-fake-server":  "npx --yes ts-node examples/servers/simple.multithread.server.ts"
   },
   "repository": {
     "type": "git",

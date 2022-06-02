@@ -1,80 +1,100 @@
 import { cpus } from 'node:os';
 import autocannon from 'autocannon';
 
-interface Options {
+interface ConnectionsTest {
+  success?: boolean,
+  connections: number,
+  rps: number,
+  avgMs: number,
+  stddev: number,
+  non2xx: number
+}
+
+interface Result {
   url: string,
-  maxResTime: number,
-  minRPS: number
-  minConnections?: number,
-  method?: autocannon.Request["method"],
-  duration?: number,
-  threads?: number,
-  verbose?: boolean,
-  //   inputNumLimit: 10,
+  requirements: {
+    maxResTime: number, minRPS: number, minConnections?: number
+  }
+  meetsRequirements: boolean,
+  best: ConnectionsTest,
+  tests?: ConnectionsTest[]
 }
 
-export async function isScalableEnough(opts: Options): Promise<any> {
+export class Test {
+  constructor(
+    readonly url: string,
+    readonly requirements: Result['requirements'],
+    readonly method?: autocannon.Request["method"],
+    readonly duration?: number,
+    readonly workers?: number,
+    readonly verbose?: boolean
+    // readonly inputNumLimit?: number,
+  ) { }
 
-  const {
-    url,
-    method,
-    maxResTime,
-    minRPS,
-    minConnections,
-    duration,
-    threads,
-    verbose
-  } = opts
+  meetsRequirements = (best: Result['best']): boolean => {
+    const { avgMs, rps, connections } = best
+    const { maxResTime, minRPS, minConnections } = this.requirements
 
-  const output: Record<string, any> = { url, tests: [], outcome: {} }
+    const respectedAvgMsLimit = avgMs < maxResTime
+    const respectedRPSLimit = rps > minRPS
+    const respectedConnectionsLimit = connections <= (minConnections ?? connections)
 
-  let connections = 1
-  let success = false
-  do {
-    const result = await autocannon({
-      url,
-      method: method ?? 'GET',
-      duration: duration ?? 10,
-      workers: threads ?? (cpus().length - 1),
-      connections: connections
-    })
+    return respectedAvgMsLimit && respectedRPSLimit && respectedConnectionsLimit
+  }
 
-    success = (result.latency.average < maxResTime) ? true : false
+  fire = async (connections: number): Promise<autocannon.Result> => await autocannon({
+    url: this.url,
+    method: this.method ?? 'GET',
+    duration: this.duration ?? 10,
+    workers: this.workers ?? (cpus().length - 1),
+    connections
+  })
 
-    const outcome = {
-      connections,
-      rps: result.requests.sent,
-      avgMs: result.latency.average,
-      stddev: result.latency.stddev,
-      non2xx: result.non2xx,
-    }
 
-    output.tests.push({
-      success,
-      ...outcome
-    })
-    if (success) {
-      output.outcome = {
-        targets: {
-          maxResTime,
-          minRPS,
-          minConnections,
-        },
-        ...outcome
+  async launch(): Promise<Result> {
+    const tests: ConnectionsTest[] = []
+
+    let best: ConnectionsTest = {} as any
+    let connections = 1
+    let success
+
+    do {
+      const { latency, requests, non2xx } = await this.fire(connections)
+
+      const testResults = {
+        connections,
+        rps: requests.sent,
+        avgMs: latency.average,
+        stddev: latency.stddev,
+        non2xx: non2xx,
       }
-      connections *= 10
+
+      success = (latency.average < this.requirements.maxResTime) ? true : false
+
+      tests.push({
+        success,
+        ...testResults
+      })
+      if (success) {
+        best = testResults
+        connections *= 10
+      }
+    } while (success);
+
+    return {
+      url: this.url,
+      requirements: this.requirements,
+      meetsRequirements: this.meetsRequirements(best),
+      best,
+      ...(this.verbose ? { tests } : {})
     }
-  } while (success);
+  }
 
-  if (!verbose) delete output.tests
-
-  output.outcome["success"] = output.outcome.avgMs < maxResTime && output.outcome.rps > minRPS && output.outcome.connections <= (minConnections ?? output.outcome.connections)
-
-  return output
 }
 
-isScalableEnough({
-  url: 'localhost:3000',
-  maxResTime: 100,
-  minRPS: 100000
-}).then(console.log);
+new Test(
+  'localhost:3000',
+  {
+    maxResTime: 100, minRPS: 100000
+  }
+).launch().then(console.log)

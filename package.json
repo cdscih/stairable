@@ -4,9 +4,9 @@
   "description": "Scalability testing tool",
   "main": "lib/index.ts",
   "scripts": {
-    "test": "jest --silent",
+    "test": "standard && jest --silent",
     "start": "tsc && node dist/index.js",
-    "lint": "eslint",
+    "standard:fix": "standard --fix",
     "launch-fake-server":  "npx --yes ts-node examples/servers/simple.multithread.server.ts"
   },
   "repository": {

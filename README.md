@@ -3,14 +3,10 @@
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 ![Node.js CI](https://github.com/claudio-di-sciacca/stairable/workflows/Node.js%20CI/badge.svg)
 
-
-
-A simple tool, based on [autocannon](https://github.com/mcollina/autocannon), which tests the target scalability of endpoints based on the variability of:
+A simple tool, based on [autocannon](https://github.com/mcollina/autocannon), which tests whether or not the target scalability of an endpoint is reached based on the variability of:
 * requests per second
 * simultaneous connections
 * variability of input size/quantity
-
-Test your endpoint with an increasing load, based on these variables, it's going to give you an idea of how close your endpoint to your wanted "scalability".
 
 Example output:
 ```javascript

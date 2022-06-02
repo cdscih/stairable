@@ -7,12 +7,15 @@
     "test": "standard && jest --silent",
     "start": "tsc && node dist/index.js",
     "standard:fix": "standard --fix",
-    "launch-fake-server":  "npx --yes ts-node examples/servers/simple.multithread.server.ts"
+    "launch-fake-server": "npx --yes ts-node examples/servers/simple.multithread.server.ts"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/claudio-di-sciacca/stairable.git"
   },
+  "pre-commit": [
+    "test"
+  ],
   "keywords": [
     "scalability",
     "test",
@@ -40,6 +43,8 @@
     "@typescript-eslint/parser": "^5.23.0",
     "eslint": "^8.15.0",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.26.0"
+    "eslint-plugin-import": "^2.26.0",
+    "pre-commit": "^1.2.2",
+    "standard": "^17.0.0"
   }
 }

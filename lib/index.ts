@@ -1,30 +1,35 @@
-import { cpus } from 'node:os';
-import autocannon from 'autocannon';
+import { cpus } from 'node:os'
+import autocannon from 'autocannon'
 
 interface ConnectionsTest {
-  success?: boolean,
-  connections: number,
-  rps: number,
-  avgMs: number,
-  stddev: number,
+  success?: boolean
+  connections: number
+  rps: number
+  avgMs: number
+  stddev: number
   non2xx: number
 }
 
+interface Requirements {
+  maxResTime: number
+  minRPS: number
+  minConnections?: number
+}
+
 interface Result {
-  url: string,
-  requirements: {
-    maxResTime: number, minRPS: number, minConnections?: number
-  }
-  meetsRequirements: boolean,
-  best: ConnectionsTest,
+  url: string
+  requirements?: Requirements
+  meetsRequirements: boolean
+  best: ConnectionsTest
   tests?: ConnectionsTest[]
 }
 
 export class Stairable {
-  constructor(
+  // eslint-disable-next-line no-useless-constructor
+  constructor (
     readonly url: string,
-    readonly requirements: Result['requirements'],
-    readonly method?: autocannon.Request["method"],
+    readonly requirements: Requirements,
+    readonly method?: autocannon.Request['method'],
     readonly duration?: number,
     readonly workers?: number,
     readonly verbose?: boolean
@@ -50,11 +55,10 @@ export class Stairable {
     connections
   })
 
-
-  async launch(): Promise<Result> {
+  async launch (): Promise<Result> {
     const tests: ConnectionsTest[] = []
 
-    let best: ConnectionsTest = {} as any
+    let best: ConnectionsTest = {} as never
     let connections = 1
     let success
 
@@ -66,10 +70,10 @@ export class Stairable {
         rps: requests.sent,
         avgMs: latency.average,
         stddev: latency.stddev,
-        non2xx: non2xx,
+        non2xx
       }
 
-      success = (latency.average < this.requirements.maxResTime) ? true : false
+      success = (latency.average < this.requirements.maxResTime)
 
       tests.push({
         success,
@@ -79,15 +83,19 @@ export class Stairable {
         best = testResults
         connections *= 10
       }
-    } while (success);
+    } while (success)
 
-    return {
+    const res: Result = {
       url: this.url,
-      requirements: this.requirements,
       meetsRequirements: this.meetsRequirements(best),
-      best,
-      ...(this.verbose ? { tests } : {})
+      best
     }
-  }
 
+    if (this.verbose) {
+      res.requirements = this.requirements
+      res.tests = tests
+    }
+
+    return res
+  }
 }

@@ -4,8 +4,8 @@
   "description": "Scalability testing tool",
   "main": "lib/index.ts",
   "scripts": {
-    "test": "standard && jest --silent",
-    "standard:fix": "standard --fix",
+    "test": "eslint . && jest --silent",
+    "lint:fix": "eslint --fix .",
     "start-sample-server": "npx --yes ts-node samples/servers/3000.server.ts",
     "start-sample-test": "npx --yes ts-node samples/3000.sample.ts"
   },
@@ -28,23 +28,23 @@
   },
   "homepage": "https://github.com/claudio-di-sciacca/stairable#readme",
   "dependencies": {
-    "autocannon": "^7.9.0",
-    "axios": "^0.27.2",
-    "express": "^4.18.1",
-    "jest": "^28.1.0",
-    "ts-jest": "^28.0.2",
-    "typescript": "^4.6.4"
+    "autocannon": "^7.9.0"
   },
   "devDependencies": {
     "@types/autocannon": "^7.6.1",
     "@types/express": "^4.17.13",
     "@types/jest": "^27.5.1",
-    "@typescript-eslint/eslint-plugin": "^5.23.0",
-    "@typescript-eslint/parser": "^5.23.0",
-    "eslint": "^8.15.0",
-    "eslint-config-airbnb-base": "^15.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.27.0",
+    "@typescript-eslint/parser": "^5.27.0",
+    "eslint": "^8.16.0",
+    "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.2.1",
+    "eslint-plugin-promise": "^6.0.0",
+    "jest": "^28.1.0",
     "pre-commit": "^1.2.2",
-    "standard": "^17.0.0"
+    "ts-jest": "^28.0.4",
+    "ts-standard": "^11.0.0",
+    "typescript": "^4.7.2"
   }
 }

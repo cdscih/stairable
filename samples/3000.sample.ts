@@ -5,4 +5,4 @@ new Stairable(
   {
     maxResTime: 100, minRPS: 100000
   }
-).launch().then(console.log)
+).launch().then(console.log).catch(() => ({}))

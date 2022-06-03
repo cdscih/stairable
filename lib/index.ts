@@ -25,7 +25,6 @@ interface Result {
 }
 
 export class Stairable {
-  // eslint-disable-next-line no-useless-constructor
   constructor (
     readonly url: string,
     readonly requirements: Requirements,

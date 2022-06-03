@@ -30,8 +30,9 @@ A Scalable Endpoint is an endpoint that, given a certain target of parameters, i
 
 ## Instructions
 
-First setup the function call in the `index.ts` file to target your wanted endpoint:
-```javascript
+Import the `Stairable` class and set it up like in the following snippet.
+
+```typescript
 import { Stairable } from "stairable";
 
 new Stairable(
@@ -42,6 +43,8 @@ new Stairable(
 ).launch().then(console.log)
 ```
 
-Second run `npm start` and wait for the results to be logged in the console.
+Then run your server followed by the node file where you setup the class.
 
-Note: you can setup a fake multithread test server running `npm run launch-fake-server` which will run on `localhost:3000`.
+### Quick test
+
+For a quick test just run the script `start-sample-server`, which will run a sample node server on localhost:3000, and then the `start-sample-test` one to launch a *Stairable* test on that endpoint.

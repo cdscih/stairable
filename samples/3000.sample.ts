@@ -1,4 +1,4 @@
-import { Stairable } from "./../lib"
+import { Stairable } from './../lib'
 
 new Stairable(
   'localhost:3000',

@@ -32,7 +32,9 @@ A Scalable Endpoint is an endpoint that, given a certain target of parameters, i
 
 First setup the function call in the `index.ts` file to target your wanted endpoint:
 ```javascript
-new Test(
+import { Stairable } from "stairable";
+
+new Stairable(
   'localhost:3000',
   {
     maxResTime: 100, minRPS: 100000

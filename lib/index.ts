@@ -20,7 +20,7 @@ interface Result {
   tests?: ConnectionsTest[]
 }
 
-export class Test {
+export class Stairable {
   constructor(
     readonly url: string,
     readonly requirements: Result['requirements'],
@@ -91,10 +91,3 @@ export class Test {
   }
 
 }
-
-new Test(
-  'localhost:3000',
-  {
-    maxResTime: 100, minRPS: 100000
-  }
-).launch().then(console.log)

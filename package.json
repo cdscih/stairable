@@ -7,7 +7,8 @@
     "test": "standard && jest --silent",
     "start": "tsc && node dist/index.js",
     "standard:fix": "standard --fix",
-    "launch-fake-server": "npx --yes ts-node examples/servers/simple.multithread.server.ts"
+    "start-sample-server": "npx --yes ts-node samples/servers/3000.server.ts",
+    "start-sample-test": "npx --yes ts-node  samples/3000.sample.ts"
   },
   "repository": {
     "type": "git",

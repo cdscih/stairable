@@ -12,13 +12,12 @@ Example output:
 ```javascript
 {
   url: 'localhost:3000',
-  requirements: { maxResTime: 100, minRPS: 100000 },
   meetsRequirements: true,
   best: {
     connections: 1000,
-    rps: 342932,
-    avgMs: 29.4,
-    stddev: 23.64,
+    rps: 214092,
+    avgMs: 47.82,
+    stddev: 30.1,
     non2xx: 0
   }
 }
@@ -33,18 +32,40 @@ A Scalable Endpoint is an endpoint that, given a certain target of parameters, i
 Import the `Stairable` class and set it up like in the following snippet.
 
 ```typescript
-import { Stairable } from "stairable";
+import { Stairable } from './../lib'
 
 new Stairable(
-  'localhost:3000',
   {
-    maxResTime: 100, minRPS: 100000
+    url: 'localhost:3000',
+    requirements: { maxResTime: 100, minRPS: 50000 },
   }
-).launch().then(console.log)
+).launch().then(console.log).catch(console.error)
 ```
 
 Then run your server followed by the node file where you setup the class.
 
-### Quick test
+### Dynamic Body creation
+
+```typescript
+import { Stairable } from './../lib'
+
+const createBody = (n: number): string => {
+  const items = []
+  for (let i = 0; i < n; i++) {
+    items.push(i)
+  }
+  return JSON.stringify({ items })
+}
+
+new Stairable(
+  {
+    url: 'localhost:3000',
+    requirements: { maxResTime: 100, minRPS: 50000 },
+    body: { create: createBody, maxNs: 1000 }
+  }
+).launch().then(console.log).catch(console.error)
+```
+
+### Quick default test
 
 For a quick test just run the script `start-sample-server`, which will run a sample node server on localhost:3000, and then the `start-sample-test` one to launch a *Stairable* test on that endpoint.

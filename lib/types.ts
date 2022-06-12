@@ -24,7 +24,16 @@ export interface Requirements {
 
 export type CreateBody = (n: number) => string | Buffer | undefined
 
-export interface Options {
+export interface EnvOptions {
+  inputLimit?: number
+  connectionsMultipler?: number,
+  bodyNMultiplier?: number,
+  connectionTestsDuration?: number
+  workers?: number
+  verbose?: boolean
+}
+
+export interface TestOptions {
   url: string
   requirements: Requirements
   headers?: Record<string, string | string[]>
@@ -32,13 +41,7 @@ export interface Options {
   body?: {
     create: CreateBody,
     maxNs: number
-  },
-  inputLimit?: number
-  connectionsMultipler?: number,
-  bodyNMultiplier?: number,
-  connectionTestsDuration?: number
-  workers?: number
-  verbose?: boolean
+  }
 }
 
 export interface Result {

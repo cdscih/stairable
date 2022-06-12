@@ -3,19 +3,20 @@ import autocannon from 'autocannon'
 
 import type {
   ConnectionsTest,
-  Options,
   Result,
-  FireResult
+  FireResult,
+  EnvOptions,
+  TestOptions
 } from './types'
 
 export class Stairable {
   constructor (
-    readonly opts: Options
+    readonly opts?: EnvOptions
   ) { }
 
-  private meetsRequirements = (best: Result['best']): boolean => {
+  private meetsRequirements = (testOpts: TestOptions, best: Result['best']): boolean => {
     const { avgMs, rps, connections } = best
-    const { maxResTime, minRPS, minConnections } = this.opts.requirements
+    const { maxResTime, minRPS, minConnections } = testOpts.requirements
 
     const respectedAvgMsLimit = avgMs < maxResTime
     const respectedRPSLimit = rps > minRPS
@@ -24,27 +25,25 @@ export class Stairable {
     return respectedAvgMsLimit && respectedRPSLimit && respectedConnectionsLimit
   }
 
-  private fire = async (connections: number, bodyNs?: number): Promise<FireResult> => {
-    const test = {
-      url: this.opts.url,
-      method: this.opts.method ?? 'GET',
-      headers: this.opts.headers ?? {},
-      body: this.opts.body?.create ? this.opts.body?.create(bodyNs ?? 1) : undefined,
-      duration: this.opts?.connectionTestsDuration ?? 5,
-      workers: this.opts?.workers ?? (cpus().length - 1),
-      connections
-    }
-    return (({ latency, requests, non2xx }) => ({ latency, requests, non2xx }))(await autocannon(test))
-  }
+  private fire = async (testOpts: TestOptions, connections: number, bodyNs?: number): Promise<FireResult> => (
+    ({ latency, requests, non2xx }) => ({ latency, requests, non2xx }))(await autocannon({
+    url: testOpts.url,
+    method: testOpts.method ?? 'GET',
+    headers: testOpts.headers ?? {},
+    body: testOpts.body?.create ? testOpts.body?.create(bodyNs ?? 1) : undefined,
+    duration: this.opts?.connectionTestsDuration ?? 5,
+    workers: this.opts?.workers ?? (cpus().length - 1),
+    connections
+  }))
 
-  private fireIncreasingBodyLength = async (connections: number): Promise<FireResult> => {
-    const maxNs = this.opts.body?.maxNs ?? 1
-    let bodyNs = (this.opts.body?.maxNs ?? 1000) / 1000
-    let success = false
+  private fireIncreasingBodyLength = async (testOpts: TestOptions, connections: number): Promise<FireResult> => {
+    const maxNs = testOpts.body?.maxNs ?? 1
+    let bodyNs = (testOpts.body?.maxNs ?? 1000) / 1000
+    let success
     let res = {}
     do {
-      const { latency, requests, non2xx } = await this.fire(connections, bodyNs)
-      success = latency.average < this.opts.requirements.maxResTime
+      const { latency, requests, non2xx } = await this.fire(testOpts, connections, bodyNs)
+      success = latency.average < testOpts.requirements.maxResTime
       if (success || !Object.keys(res).length) {
         res = {
           latency, requests, non2xx, maxBodyLenght: bodyNs
@@ -55,7 +54,7 @@ export class Stairable {
     return res as FireResult
   }
 
-  async launch (): Promise<Result> {
+  async launch (testOpts: TestOptions): Promise<Result> {
     const tests: ConnectionsTest[] = []
 
     let best: ConnectionsTest = {} as never
@@ -64,9 +63,9 @@ export class Stairable {
 
     do {
       const { latency, requests, non2xx, maxBodyLenght } =
-        this.opts.body
-          ? await this.fireIncreasingBodyLength(connections)
-          : await this.fire(connections)
+        testOpts.body
+          ? await this.fireIncreasingBodyLength(testOpts, connections)
+          : await this.fire(testOpts, connections)
 
       const testResults = {
         connections,
@@ -74,10 +73,10 @@ export class Stairable {
         avgMs: latency.average,
         stddev: latency.stddev,
         non2xx,
-        ...(this.opts.body ? { maxBodyLenght } : {})
+        ...(testOpts.body ? { maxBodyLenght } : {})
       }
 
-      success = latency.average < this.opts.requirements.maxResTime
+      success = latency.average < testOpts.requirements.maxResTime
 
       tests.push({
         success,
@@ -90,13 +89,13 @@ export class Stairable {
     } while (success)
 
     const res: Result = {
-      url: this.opts.url,
-      meetsRequirements: this.meetsRequirements(best),
+      url: testOpts.url,
+      meetsRequirements: this.meetsRequirements(testOpts, best),
       best
     }
 
     if (this.opts?.verbose) {
-      res.requirements = this.opts.requirements
+      res.requirements = testOpts.requirements
       res.tests = tests
     }
 

@@ -34,12 +34,10 @@ Import the `Stairable` class and set it up like in the following snippet.
 ```typescript
 import { Stairable } from './../lib'
 
-new Stairable(
-  {
-    url: 'localhost:3000',
-    requirements: { maxResTime: 100, minRPS: 50000 },
-  }
-).launch().then(console.log).catch(console.error)
+new Stairable().launch({
+  url: 'localhost:3000',
+  requirements: { maxResTime: 100, minRPS: 50000 }
+}).then(console.log).catch(console.error)
 ```
 
 Then run your server followed by the node file where you setup the class.
@@ -57,13 +55,11 @@ const createBody = (n: number): string => {
   return JSON.stringify({ items })
 }
 
-new Stairable(
-  {
-    url: 'localhost:3000',
-    requirements: { maxResTime: 100, minRPS: 50000 },
-    body: { create: createBody, maxNs: 1000 }
-  }
-).launch().then(console.log).catch(console.error)
+new Stairable().launch({
+  url: 'localhost:3000',
+  requirements: { maxResTime: 100, minRPS: 50000 },
+  body: { create: createBody, maxNs: 1000 }
+}).then(console.log).catch(console.error)
 ```
 
 ### Quick default test

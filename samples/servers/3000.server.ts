@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // https://nodejs.org/api/cluster.html#cluster_cluster
 import cluster from 'node:cluster'
 import http from 'node:http'

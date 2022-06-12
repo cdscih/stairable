@@ -4,8 +4,9 @@
   "description": "Scalability testing tool",
   "main": "lib/index.ts",
   "scripts": {
-    "test": "eslint . && jest --silent",
-    "lint:fix": "eslint --fix .",
+    "test": "npm run lint && jest --silent",
+    "lint": "eslint \"**/*.{ts,tsx}\"",
+    "lint:fix": "eslint --fix \"**/*.{ts,tsx}\"",
     "start-sample-server": "npx --yes ts-node samples/servers/3000.server.ts",
     "start-sample-test": "npx --yes ts-node samples/3000.sample.ts"
   },
@@ -46,5 +47,12 @@
     "ts-jest": "^28.0.4",
     "ts-standard": "^11.0.0",
     "typescript": "^4.7.2"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": [
+      "./test"
+    ]
   }
 }

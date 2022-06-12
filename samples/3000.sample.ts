@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Stairable } from './../lib'
 
 const createBody = (n: number): string => {
@@ -8,11 +9,8 @@ const createBody = (n: number): string => {
   return JSON.stringify({ items })
 }
 
-new Stairable(
-  {
-    url: 'localhost:3000',
-    requirements: { maxResTime: 100, minRPS: 50000 },
-    body: { create: createBody, maxNs: 1000 },
-    connectionTestsDuration: 5
-  }
-).launch().then(console.log).catch(console.error)
+new Stairable().launch({
+  url: 'localhost:3000',
+  requirements: { maxResTime: 100, minRPS: 50000 },
+  body: { create: createBody, maxNs: 1000 }
+}).then(console.log).catch(console.error)

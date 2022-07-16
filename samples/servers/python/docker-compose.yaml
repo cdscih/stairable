@@ -1,0 +1,31 @@
+version: '3.9'
+
+services:
+  server:
+    build: .
+    environment:
+      - PGPASSWORD=example
+    ports:
+      - '8002:8000'
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - python-server
+
+  postgres:
+    image: 'postgres:14.4-alpine'
+    environment:
+      POSTGRES_PASSWORD: example
+    ports:
+      - '5431:5432'
+    networks:
+      - python-server
+
+  redis:
+    image: 'redis:7.0.3-alpine'
+    networks:
+      - python-server
+
+networks:
+  python-server:
